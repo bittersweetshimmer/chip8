@@ -1,6 +1,6 @@
 #pragma once
-#include <cstdint>
+#include <chip8/Aliases/Byte.hpp>
 
 namespace chip8 {
-    using GPRegister = std::uint8_t;
+    using GPRegister = chip8::Byte;
 }

@@ -28,6 +28,7 @@ auto chip8::traits::Instruction<chip8::Instruction>::decode(chip8::InstructionCo
     else if (auto sub  = chip8::decode<chip8::instructions::SUB> (ic)) return chip8::Instruction( sub.value());
     else if (auto subn = chip8::decode<chip8::instructions::SUBN>(ic)) return chip8::Instruction(subn.value());
     else if (auto xor_ = chip8::decode<chip8::instructions::XOR> (ic)) return chip8::Instruction(xor_.value());
+    else if (auto sys  = chip8::decode<chip8::instructions::SYS> (ic)) return chip8::Instruction( sys.value());
     else return std::nullopt;
 };
 

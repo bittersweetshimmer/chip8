@@ -1,5 +1,5 @@
 #pragma once
-#include <chip8/aliases/Sprite.hpp>
+#include <chip8/Aliases/Sprite.hpp>
 
 namespace chip8::sprites {
     constexpr std::size_t CHARACTER_HEIGHT = 5u;

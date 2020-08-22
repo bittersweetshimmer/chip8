@@ -16,14 +16,16 @@ auto chip8::traits::Instruction<chip8::instructions::LDbyte>::execute(const chip
 
 auto chip8::traits::Instruction<chip8::instructions::LDbyte>::decode(chip8::InstructionCode ic) -> std::optional<chip8::instructions::LDbyte> {
     if ((ic & 0xF000) == 0x6000) return chip8::instructions::LDbyte{
-        .vx = static_cast<chip8::GPRegister>(((ic & 0x0F00)) >> 0x08),
-        .byte = static_cast<chip8::Byte>((ic & 0x00FF))
+        .vx   = static_cast<chip8::GPRegister>(((ic & 0x0F00)) >> 0x08),
+        .byte = static_cast<chip8::Byte>       ((ic & 0x00FF))
     };
     else return std::nullopt;
 };
 
 auto chip8::traits::Instruction<chip8::instructions::LDbyte>::encode(const chip8::instructions::LDbyte& instruction) -> chip8::InstructionCode {
-    return 0x6000 | ((static_cast<chip8::InstructionCode>(instruction.vx) & 0x000F) << 8) | instruction.byte;
+    return 0x6000 |
+        ((static_cast<chip8::InstructionCode>(instruction.vx) & 0x000F) << 8) |
+        instruction.byte;
 };
 
 
@@ -53,7 +55,9 @@ auto chip8::traits::Instruction<chip8::instructions::LDregister>::decode(chip8::
 };
 
 auto chip8::traits::Instruction<chip8::instructions::LDregister>::encode(const chip8::instructions::LDregister& instruction) -> chip8::InstructionCode {
-    return 0x8000 | ((static_cast<chip8::InstructionCode>(instruction.vx) & 0x000F) << 8) | ((static_cast<chip8::InstructionCode>(instruction.vy) & 0x000F) << 4);
+    return 0x8000 |
+        ((static_cast<chip8::InstructionCode>(instruction.vx) & 0x000F) << 8) |
+        ((static_cast<chip8::InstructionCode>(instruction.vy) & 0x000F) << 4);
 };
 
 
@@ -70,8 +74,8 @@ auto chip8::traits::Display<chip8::instructions::LDkeyPress>::display(const chip
 };
 
 auto chip8::traits::Instruction<chip8::instructions::LDkeyPress>::execute(const chip8::instructions::LDkeyPress& instruction, chip8::Chip8& chip8) -> void {
-    for (std::size_t key = 0x0; key < chip8.keyboard.size(); ++key) {
-        if (chip8.keyboard[key] != 0x0) {
+    for (std::size_t key = 0x0; key < chip8::KEYBOARD_SIZE; ++key) {
+        if (chip8::get_key(chip8.keyboard, key) && !chip8::get_key(chip8.previous_keyboard, key)) {
             chip8.general_purpose_registers[instruction.vx] = key;
             chip8.program_counter += 0x02;
 

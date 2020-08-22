@@ -41,7 +41,7 @@ auto chip8::traits::Instruction<chip8::instructions::JPoffset>::execute(const ch
 
 auto chip8::traits::Instruction<chip8::instructions::JPoffset>::decode(chip8::InstructionCode ic) -> std::optional<chip8::instructions::JPoffset> {
     if ((ic & 0xF000) == 0xB000) return chip8::instructions::JPoffset{
-        .offset = static_cast<Address>((ic & 0x0FFF))
+        .offset = static_cast<chip8::Address>((ic & 0x0FFF))
     };
     else return std::nullopt;
 };

@@ -30,5 +30,7 @@ auto chip8::traits::Instruction<chip8::instructions::SUB>::decode(chip8::Instruc
 };
 
 auto chip8::traits::Instruction<chip8::instructions::SUB>::encode(const chip8::instructions::SUB& instruction) -> chip8::InstructionCode {
-    return 0x8005 | ((static_cast<chip8::InstructionCode>(instruction.vx) & 0x000F) << 8) | ((static_cast<chip8::InstructionCode>(instruction.vy) & 0x000F) << 4);
+    return 0x8005 |
+        ((static_cast<chip8::InstructionCode>(instruction.vx) & 0x000F) << 8) |
+        ((static_cast<chip8::InstructionCode>(instruction.vy) & 0x000F) << 4);
 };

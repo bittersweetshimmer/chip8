@@ -22,7 +22,7 @@ auto chip8::decompile(const chip8::ByteCode& bytecode) -> std::optional<chip8::P
     program.reserve(bytecode.size() / 2u);
 
     for (std::size_t i = 0; i < bytecode.size(); i += 2) {
-        std::uint16_t opcode = 0x00;
+        chip8::InstructionCode opcode = 0x00;
         opcode |= bytecode[i + 0x01] << 0x08;
         opcode |= bytecode[i + 0x00] << 0x00;
         

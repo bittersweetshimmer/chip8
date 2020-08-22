@@ -16,14 +16,16 @@ auto chip8::traits::Instruction<chip8::instructions::ADDbyte>::execute(const chi
 
 auto chip8::traits::Instruction<chip8::instructions::ADDbyte>::decode(chip8::InstructionCode ic) -> std::optional<chip8::instructions::ADDbyte> {
     if ((ic & 0xF000) == 0x7000) return chip8::instructions::ADDbyte{
-        .vx = static_cast<chip8::GPRegister>(((ic & 0x0F00)) >> 0x08),
-        .byte = static_cast<chip8::Byte>((ic & 0x00FF))
+        .vx   = static_cast<chip8::GPRegister>(((ic & 0x0F00)) >> 0x08),
+        .byte = static_cast<chip8::Byte>       ((ic & 0x00FF))
     };
     else return std::nullopt;
 };
 
 auto chip8::traits::Instruction<chip8::instructions::ADDbyte>::encode(const chip8::instructions::ADDbyte& instruction) -> chip8::InstructionCode {
-    return 0x7000 | ((static_cast<chip8::InstructionCode>(instruction.vx) & 0x000F) << 8) | instruction.byte;
+    return 0x7000 |
+        ((static_cast<chip8::InstructionCode>(instruction.vx) & 0x000F) << 8) |
+        instruction.byte;
 };
 
 
@@ -61,7 +63,9 @@ auto chip8::traits::Instruction<chip8::instructions::ADDregister>::decode(chip8:
 };
 
 auto chip8::traits::Instruction<chip8::instructions::ADDregister>::encode(const chip8::instructions::ADDregister& instruction) -> chip8::InstructionCode {
-    return 0x8004 | ((static_cast<std::uint16_t>(instruction.vx) & 0x000F) << 8) | ((static_cast<std::uint16_t>(instruction.vy) & 0x000F) << 4);
+    return 0x8004 |
+        ((static_cast<chip8::InstructionCode>(instruction.vx) & 0x000F) << 8) |
+        ((static_cast<chip8::InstructionCode>(instruction.vy) & 0x000F) << 4);
 };
 
 
@@ -84,13 +88,14 @@ auto chip8::traits::Instruction<chip8::instructions::ADDaddress>::execute(const 
 
 auto chip8::traits::Instruction<chip8::instructions::ADDaddress>::decode(chip8::InstructionCode ic) -> std::optional<chip8::instructions::ADDaddress> {
     if ((ic & 0xF0FF) == 0xF01E) return chip8::instructions::ADDaddress{
-        .vx = static_cast<GPRegister>(((ic & 0x0F00)) >> 0x08)
+        .vx = static_cast<chip8::GPRegister>(((ic & 0x0F00)) >> 0x08)
     };
     else return std::nullopt;
 };
 
 auto chip8::traits::Instruction<chip8::instructions::ADDaddress>::encode(const chip8::instructions::ADDaddress& instruction) -> chip8::InstructionCode {
-    return 0xF01E | ((static_cast<std::uint16_t>(instruction.vx) & 0x000F) << 8);
+    return 0xF01E |
+        ((static_cast<chip8::InstructionCode>(instruction.vx) & 0x000F) << 8);
 };
 
 

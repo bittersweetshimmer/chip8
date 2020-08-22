@@ -23,5 +23,7 @@ auto chip8::traits::Instruction<chip8::instructions::RND>::decode(chip8::Instruc
 };
 
 auto chip8::traits::Instruction<chip8::instructions::RND>::encode(const chip8::instructions::RND& instruction) -> chip8::InstructionCode {
-    return 0xC000 | ((static_cast<chip8::InstructionCode>(instruction.vx) & 0x000F) << 8) | instruction.byte;
+    return 0xC000 |
+        ((static_cast<chip8::InstructionCode>(instruction.vx) & 0x000F) << 8) |
+        instruction.byte;
 };

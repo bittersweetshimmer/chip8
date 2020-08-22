@@ -1,5 +1,10 @@
 # chip8
-A [`CHIP-8`](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM) emulator. Sound not implemented.
+A [CHIP-8](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM) emulator.
+* Sound not implemented.
+* Runs at [500Hz](https://github.com/bittersweetshimmer/chip8/blob/master/chip8/src/main.cpp#L10).
+* Quits if an invalid instruction is encountered.
+* [`DRW`](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#Dxyn) wraps around the display.
+* Ignores [`SYS`](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#0nnn).
 
 ### Build
 ```sh
@@ -7,7 +12,7 @@ A [`CHIP-8`](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM) emulator. Sound n
 > mkdir build
 > cd build
 > cmake ..
-> make -j8 # or `msbuild chip8.sln /m` if you're using Visual Studio 
+> cmake --build . --target chip8 -j8
 ```
 
 ### Usage

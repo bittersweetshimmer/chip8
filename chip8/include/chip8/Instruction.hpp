@@ -18,6 +18,7 @@
 #include <chip8/instructions/SUB.hpp>
 #include <chip8/instructions/SUBN.hpp>
 #include <chip8/instructions/XOR.hpp>
+#include <chip8/instructions/SYS.hpp>
 
 #include <optional>
 #include <chip8/Aliases/InstructionCode.hpp>
@@ -45,7 +46,8 @@ namespace chip8 {
         chip8::instructions::RND,
         chip8::instructions::DRW,
         chip8::instructions::SKP,
-        chip8::instructions::SKNP
+        chip8::instructions::SKNP,
+        chip8::instructions::SYS
     >;
 }
 

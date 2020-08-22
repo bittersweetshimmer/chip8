@@ -25,6 +25,7 @@ set(SOURCES
     src/chip8/Instructions/SUB.cpp
     src/chip8/Instructions/SUBN.cpp
     src/chip8/Instructions/XOR.cpp
+    src/chip8/Instructions/SYS.cpp
     src/chip8/GUI/Window.cpp
 )
 

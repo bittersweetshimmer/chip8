@@ -18,6 +18,7 @@ namespace chip8 {
         chip8::Memory memory = chip8::Memory{};
         chip8::Display display = chip8::Display{};
         chip8::Keyboard keyboard = chip8::Keyboard{};
+        chip8::Keyboard previous_keyboard = chip8::Keyboard{};
 
         chip8::GPRegisters general_purpose_registers;
 

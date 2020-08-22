@@ -36,7 +36,7 @@ auto chip8::gui::Window::init() -> bool {
 	}
 
 	glfwSetWindowSizeCallback(window.get(), [](GLFWwindow* window, int width, int height) {
-		auto self = static_cast<Window*>(glfwGetWindowUserPointer(window));
+		auto self = static_cast<chip8::gui::Window*>(glfwGetWindowUserPointer(window));
 
 		chip8::gui::Event resize_event = chip8::gui::ev::WindowResizeEvent{ width, height };
 
@@ -48,13 +48,13 @@ auto chip8::gui::Window::init() -> bool {
 
 
 	glfwSetWindowFocusCallback(window.get(), [](GLFWwindow* window, int focused) {
-		auto self = static_cast<Window*>(glfwGetWindowUserPointer(window));
+		auto self = static_cast<chip8::gui::Window*>(glfwGetWindowUserPointer(window));
 
 		self->focus = focused == 0 ? false : true;
 	});
 
 	glfwSetKeyCallback(window.get(), [](GLFWwindow* window, int key, int scancode, int action, int mods) {
-		auto self = static_cast<Window*>(glfwGetWindowUserPointer(window));
+		auto self = static_cast<chip8::gui::Window*>(glfwGetWindowUserPointer(window));
 
 		const auto _key = chip8::gui::io::to_key(key);
 		const auto _action = chip8::gui::io::to_action(action);
@@ -72,7 +72,7 @@ auto chip8::gui::Window::init() -> bool {
 	});
 
 	glfwSetDropCallback(window.get(), [](GLFWwindow* window, int count, const char** paths) {
-		auto self = static_cast<Window*>(glfwGetWindowUserPointer(window));
+		auto self = static_cast<chip8::gui::Window*>(glfwGetWindowUserPointer(window));
 
 		std::vector<std::filesystem::path> fs_paths;
 		fs_paths.reserve(count);

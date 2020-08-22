@@ -19,14 +19,16 @@ auto chip8::traits::Instruction<chip8::instructions::SNEbyte>::execute(const chi
 
 auto chip8::traits::Instruction<chip8::instructions::SNEbyte>::decode(chip8::InstructionCode ic) -> std::optional<chip8::instructions::SNEbyte> {
     if ((ic & 0xF000) == 0x4000) return chip8::instructions::SNEbyte{
-        .vx = static_cast<chip8::GPRegister>(((ic & 0x0F00)) >> 0x08),
-        .byte = static_cast<chip8::Byte>((ic & 0x00FF))
+        .vx   = static_cast<chip8::GPRegister>(((ic & 0x0F00)) >> 0x08),
+        .byte = static_cast<chip8::Byte>       ((ic & 0x00FF))
     };
     else return std::nullopt;
 };
 
 auto chip8::traits::Instruction<chip8::instructions::SNEbyte>::encode(const chip8::instructions::SNEbyte& instruction) -> chip8::InstructionCode {
-    return 0x4000 | ((static_cast<chip8::InstructionCode>(instruction.vx) & 0x000F) << 8) | instruction.byte;
+    return 0x4000 |
+        ((static_cast<chip8::InstructionCode>(instruction.vx) & 0x000F) << 8) |
+        instruction.byte;
 };
 
 
@@ -59,7 +61,9 @@ auto chip8::traits::Instruction<chip8::instructions::SNEregister>::decode(chip8:
 };
 
 auto chip8::traits::Instruction<chip8::instructions::SNEregister>::encode(const chip8::instructions::SNEregister& instruction) -> chip8::InstructionCode {
-    return 0x9000 | ((static_cast<std::uint16_t>(instruction.vx) & 0x000F) << 8) | ((static_cast<std::uint16_t>(instruction.vy) & 0x000F) << 4);
+    return 0x9000 |
+        ((static_cast<chip8::InstructionCode>(instruction.vx) & 0x000F) << 8) |
+        ((static_cast<chip8::InstructionCode>(instruction.vy) & 0x000F) << 4);
 };
 
 

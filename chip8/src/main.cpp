@@ -7,35 +7,28 @@
 #include <chip8/Instruction.hpp>
 #include <chip8/GUI/Window.hpp>
 
-constexpr std::array<chip8::Byte, 2> LOOP = { 0x12, 0x00 };
+constexpr auto CLOCK_RATE = 500.0;
+constexpr auto TIMER_RATE = 60.0;
 
-auto main(int argc, char* argv[]) -> int {
-    srand(time(0));
-    auto chip8 = chip8::initialize(chip8::ByteCode(LOOP.begin(), LOOP.end()), rand());
+constexpr auto KEY_MAPPING = std::array<chip8::gui::io::Key, chip8::KEYBOARD_SIZE>{
+    chip8::gui::io::Key::KEY_0, chip8::gui::io::Key::KEY_1,
+    chip8::gui::io::Key::KEY_2, chip8::gui::io::Key::KEY_3,
+    chip8::gui::io::Key::KEY_4, chip8::gui::io::Key::KEY_5,
+    chip8::gui::io::Key::KEY_6, chip8::gui::io::Key::KEY_7,
+    chip8::gui::io::Key::KEY_8, chip8::gui::io::Key::KEY_9,
+    chip8::gui::io::Key::A,     chip8::gui::io::Key::B,
+    chip8::gui::io::Key::C,     chip8::gui::io::Key::D,
+    chip8::gui::io::Key::E,     chip8::gui::io::Key::F
+};
 
-    auto window = chip8::gui::Window(960, 480, "CHIP-8");
-    if (!window.init()) {
-        std::cout << "Window creation failed." << std::endl;
-        return EXIT_FAILURE;
-    }
+using Vec2         = std::array<gloomy::Float, 2>;
+using Position     = gloomy::Attribute<struct PositionTag, Vec2>;
+using TextureCoord = gloomy::Attribute<struct TextureCoordTag, Vec2>;
+using Attributes   = gloomy::Attributes<Position, TextureCoord>;
+using Vertex       = gloomy::Vertex<Position, TextureCoord>;
+using Index        = gloomy::U8;
 
-    constexpr auto CLOCK_RATE = 500.0;
-    constexpr auto TIMER_RATE = 60.0;
-
-    auto timer = window.get_next_frame().current_time;
-    auto clock = timer;
-
-    using Vec2 = std::array<gloomy::Float, 2>;
-
-    using Position = gloomy::Attribute<struct PositionTag, Vec2>;
-    using TextureCoord = gloomy::Attribute<struct TextureCoordTag, Vec2>;
-
-    using Attributes = gloomy::Attributes<Position, TextureCoord>;
-    using Vertex = gloomy::Vertex<Position, TextureCoord>;
-    using Index = gloomy::U8;
-
-    const auto program = gloomy::make_ready<gloomy::Program>(
-        gloomy::make_ready<gloomy::VertexShader>(R"(
+constexpr auto VERTEX_SHADER = R"(
 #version 330 core
 layout(location = 0) in vec2 v_position;
 layout(location = 1) in vec2 v_texcoord;
@@ -47,8 +40,9 @@ void main() {
 
     f_texcoord = v_texcoord;
 }
-        )"),
-        gloomy::make_ready<gloomy::FragmentShader>(R"(
+)";
+
+constexpr auto FRAGMENT_SHADER = R"(
 #version 330 core
 out vec4 o_color;
 
@@ -59,7 +53,21 @@ uniform sampler2D u_texture;
 void main() {
     o_color = vec4(texture(u_texture, f_texcoord).r, texture(u_texture, f_texcoord).r, texture(u_texture, f_texcoord).r, 1.0);
 }
-        )")
+)";
+
+auto main(int argc, char* argv[]) -> int {
+    srand(time(0));
+    auto chip8 = chip8::initialize({ 0x12, 0x00 }, rand());
+
+    auto window = chip8::gui::Window(960, 480, "CHIP-8");
+    if (!window.init()) {
+        std::cout << "Window creation failed." << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    const auto program = gloomy::make_ready<gloomy::Program>(
+        gloomy::make_ready<gloomy::VertexShader>(VERTEX_SHADER),
+        gloomy::make_ready<gloomy::FragmentShader>(FRAGMENT_SHADER)
     );
 
     const auto indices = std::array<Index, 6>{0, 1, 3, 1, 2, 3};
@@ -70,21 +78,21 @@ void main() {
         Vertex{{-1.0f, -1.0f}, {0.0f, 1.0f}},
     };
 
-    auto display_texture = gloomy::Texture2D(chip8.display.data(), chip8::DISPLAY_SIZE, chip8::DISPLAY_WIDTH, chip8::DISPLAY_HEIGHT);
+    auto display_texture = gloomy::make_generated<gloomy::Texture2D>(chip8.display.data(), chip8::DISPLAY_SIZE, chip8::DISPLAY_WIDTH, chip8::DISPLAY_HEIGHT);
     display_texture.internal_format = gloomy::TextureInternalFormat::RED;
     display_texture.pixel_format = gloomy::PixelFormat::RED;
     display_texture.pixel_data_type = gloomy::PixelDataType::U8;
 
-    display_texture.generate();
-    display_texture.bind();
-    display_texture.commit();
-    display_texture.unbind();
+    gloomy::use([&] { display_texture.commit(); }, display_texture);
 
     const auto index_buffer = gloomy::make_ready<gloomy::IndexBuffer>(indices);
     const auto vertex_buffer = gloomy::make_ready<gloomy::VertexBuffer>(vertices);
     const auto vertex_array = gloomy::make_generated<gloomy::VertexArray>(Attributes::dynamic());
 
     gloomy::use([&] { vertex_array.commit(); }, vertex_array, vertex_buffer, index_buffer);
+
+    auto timer = window.get_next_frame().current_time;
+    auto clock = timer;
 
     while (window.is_open()) {
         const auto timeframe = window.get_next_frame();
@@ -93,7 +101,7 @@ void main() {
             if (chip8.delay_timer != 0)
                 chip8.delay_timer -= 1;
 
-            if (chip8.sound_timer > 0)
+            if (chip8.sound_timer != 0)
                 chip8.sound_timer -= 1;
 
             timer -= timeframe.current_time;
@@ -124,27 +132,9 @@ void main() {
         for (std::size_t i = 0u; i < cycles; ++i) {
             clock = timeframe.current_time;
 
+            chip8.previous_keyboard = chip8.keyboard;
             for (std::size_t key = 0x0; key < chip8::KEYBOARD_SIZE; ++key) {
-                constexpr auto mapping = std::array<chip8::gui::io::Key, chip8::KEYBOARD_SIZE>{
-                    chip8::gui::io::Key::KEY_0,
-                    chip8::gui::io::Key::KEY_1,
-                    chip8::gui::io::Key::KEY_2,
-                    chip8::gui::io::Key::KEY_3,
-                    chip8::gui::io::Key::KEY_4,
-                    chip8::gui::io::Key::KEY_5,
-                    chip8::gui::io::Key::KEY_6,
-                    chip8::gui::io::Key::KEY_7,
-                    chip8::gui::io::Key::KEY_8,
-                    chip8::gui::io::Key::KEY_9,
-                    chip8::gui::io::Key::A,
-                    chip8::gui::io::Key::B,
-                    chip8::gui::io::Key::C,
-                    chip8::gui::io::Key::D,
-                    chip8::gui::io::Key::E,
-                    chip8::gui::io::Key::F
-                };
-
-                chip8.keyboard[key] = window.input_buffer.contains(mapping[key]);
+                chip8::set_key(chip8.keyboard, key, window.input_buffer.contains(KEY_MAPPING[key]));
             }
 
             const auto ic = chip8::fetch(chip8);
