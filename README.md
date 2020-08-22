@@ -18,6 +18,8 @@ A [CHIP-8](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM) emulator.
 ### Usage
 Just drop any valid ROM on the window.
 
+![screenshot](https://raw.githubusercontent.com/bittersweetshimmer/chip8/master/SCREENSHOT.png)
+
 ### 3rd party code
 - [GLFW](https://www.glfw.org/) - OpenGL library - `zlib/libpng`
 - [gloomy](https://github.com/bittersweetshimmer/gloomy) - My OpenGL reusable stuff - `MIT`
