@@ -1,6 +1,6 @@
 #include <iomanip>
 #include <sstream>
-#include <chip8/instructions/SKNP.hpp>
+#include <chip8/Instructions/SKNP.hpp>
 
 auto chip8::traits::Display<chip8::instructions::SKNP>::display(const chip8::instructions::SKNP& instruction) -> std::string {
     std::ostringstream ss;

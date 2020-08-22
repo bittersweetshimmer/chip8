@@ -1,4 +1,4 @@
-#include <chip8/instructions/RET.hpp>
+#include <chip8/Instructions/RET.hpp>
 
 auto chip8::traits::Display<chip8::instructions::RET>::display(const chip8::instructions::RET&) -> std::string {
     return "RET";

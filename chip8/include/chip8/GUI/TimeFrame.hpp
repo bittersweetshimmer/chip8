@@ -1,5 +1,5 @@
 #pragma once
-#include <chip8/gui/Time.hpp>
+#include <chip8/GUI/Time.hpp>
 
 namespace chip8::gui {
 	struct TimeFrame {

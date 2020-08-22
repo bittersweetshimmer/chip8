@@ -1,6 +1,6 @@
 #include <iomanip>
 #include <sstream>
-#include <chip8/instructions/OR.hpp>
+#include <chip8/Instructions/OR.hpp>
 
 auto chip8::traits::Display<chip8::instructions::OR>::display(const chip8::instructions::OR& instruction) -> std::string {
     std::ostringstream ss;

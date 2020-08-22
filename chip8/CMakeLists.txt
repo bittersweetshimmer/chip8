@@ -51,6 +51,11 @@ target_link_directories(chip8 PRIVATE ${OPENAL_LIBRARY})
 
 target_link_libraries(chip8 glfw)
 target_link_libraries(chip8 gloomy)
-target_link_libraries(chip8 OpenAL32)
+
+if (WIN32)
+    target_link_libraries(chip8 OpenAL32)
+else()
+    target_link_libraries(chip8 openal)
+endif()
 
 set_target_properties(chip8 PROPERTIES CXX_STANDARD 20)

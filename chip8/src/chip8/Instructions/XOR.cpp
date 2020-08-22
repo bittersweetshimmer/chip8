@@ -1,6 +1,6 @@
 #include <iomanip>
 #include <sstream>
-#include <chip8/instructions/XOR.hpp>
+#include <chip8/Instructions/XOR.hpp>
 
 auto chip8::traits::Display<chip8::instructions::XOR>::display(const chip8::instructions::XOR& instruction) -> std::string {
     std::ostringstream ss;

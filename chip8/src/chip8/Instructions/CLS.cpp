@@ -1,4 +1,4 @@
-#include <chip8/instructions/CLS.hpp>
+#include <chip8/Instructions/CLS.hpp>
 
 auto chip8::traits::Display<chip8::instructions::CLS>::display(const chip8::instructions::CLS&) -> std::string {
     return "CLS";

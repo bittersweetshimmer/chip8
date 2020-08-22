@@ -1,6 +1,6 @@
 #include <iomanip>
 #include <sstream>
-#include <chip8/instructions/JP.hpp>
+#include <chip8/Instructions/JP.hpp>
 
 auto chip8::traits::Display<chip8::instructions::JPabsolute>::display(const chip8::instructions::JPabsolute& instruction) -> std::string {
     std::ostringstream ss;
