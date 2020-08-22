@@ -141,8 +141,8 @@ auto main(int argc, char* argv[]) -> int {
         std::size_t clock_cycles = (timeframe.current_time - clock) / (1.0 / CLOCK_RATE);
         std::size_t timer_cycles = (timeframe.current_time - timer) / (1.0 / TIMER_RATE);
         
-        if (timer_cycles != 0u) timer = timeframe.current_time;
-        if (clock_cycles != 0u) clock = timeframe.current_time;
+        if (clock_cycles != 0u) clock += clock_cycles * (1.0 / CLOCK_RATE);
+        if (timer_cycles != 0u) timer += timer_cycles * (1.0 / TIMER_RATE);
 
         // Timers
         for (std::size_t i = 0u; i < timer_cycles; ++i) {
