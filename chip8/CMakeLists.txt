@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-set(SOURCES
+set(CHIP8_SOURCES
     src/main.cpp
     src/chip8/Chip8.cpp
     src/chip8/Instruction.cpp
@@ -29,12 +29,28 @@ set(SOURCES
     src/chip8/GUI/Window.cpp
 )
 
-add_executable(chip8 ${SOURCES})
+set(ALOOMY_SOURCES
+    src/aloomy/Context.cpp
+    src/aloomy/Device.cpp
+    src/aloomy/Objects/Buffer.cpp
+    src/aloomy/Objects/Source.cpp
+)
+
+add_executable(chip8 ${CHIP8_SOURCES} ${ALOOMY_SOURCES})
+
+if (WIN32)
+    target_compile_definitions(chip8 PRIVATE NOMINMAX)
+endif()
+
+find_package(OpenAL REQUIRED)
 
 target_include_directories(chip8 PUBLIC include/)
-target_include_directories(chip8 PRIVATE /usr/include/)
+target_include_directories(chip8 PRIVATE ${OPENAL_INCLUDE_DIR})
+
+target_link_directories(chip8 PRIVATE ${OPENAL_LIBRARY})
 
 target_link_libraries(chip8 glfw)
 target_link_libraries(chip8 gloomy)
+target_link_libraries(chip8 OpenAL32)
 
 set_target_properties(chip8 PROPERTIES CXX_STANDARD 20)

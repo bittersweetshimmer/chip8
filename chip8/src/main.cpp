@@ -2,13 +2,18 @@
 #include <fstream>
 #include <iomanip>
 #include <chrono>
+#include <cmath>
+#include <numbers>
 
+#include <aloomy/aloomy.hpp>
 #include <chip8/Chip8.hpp>
 #include <chip8/Instruction.hpp>
 #include <chip8/GUI/Window.hpp>
 
 constexpr auto CLOCK_RATE = 500.0;
 constexpr auto TIMER_RATE = 60.0;
+
+constexpr auto SOUND_FREQUENCY = 440.0;
 
 constexpr auto KEY_MAPPING = std::array<chip8::gui::io::Key, chip8::KEYBOARD_SIZE>{
     chip8::gui::io::Key::KEY_0, chip8::gui::io::Key::KEY_1,
@@ -57,14 +62,49 @@ void main() {
 
 auto main(int argc, char* argv[]) -> int {
     srand(time(0));
+
+    // CHIP-8
     auto chip8 = chip8::initialize({ 0x12, 0x00 }, rand());
 
+    // Window
     auto window = chip8::gui::Window(960, 480, "CHIP-8");
     if (!window.init()) {
         std::cout << "Window creation failed." << std::endl;
         return EXIT_FAILURE;
     }
 
+    // Audio
+    auto audio_device = aloomy::Device();
+    const auto audio_context = aloomy::Context(audio_device);
+    audio_context.make_current();
+
+    // Generating a 1 second of 44.1KHz sine wave
+    constexpr auto FREQUENCY = 44100u;
+    aloomy::AudioData audio_data;
+    audio_data.data = std::make_unique<std::byte[]>(FREQUENCY * 2u);
+    audio_data.size = FREQUENCY * 2u;
+    audio_data.format = AL_FORMAT_MONO16;
+    audio_data.frequency = FREQUENCY;
+
+    for (std::size_t i = 0u; i < audio_data.size; i += 2) {
+        double normalized = static_cast<double>(i) / static_cast<double>(audio_data.size);
+        double argument = normalized * 2 * std::numbers::pi;
+        double sin_value = std::sin(argument * SOUND_FREQUENCY); 
+
+        std::uint16_t sample = ((sin_value + 1.0) / 2.0) * static_cast<double>(std::numeric_limits<std::uint16_t>::max());
+
+        audio_data.data[i + 0x01] = static_cast<std::byte>((sample >> 0x8) & 0xFF);
+        audio_data.data[i + 0x00] = static_cast<std::byte>((sample >> 0x0) & 0xFF);
+    }
+
+    aloomy::Buffer audio_buffer;
+    audio_buffer.set_audio(std::move(audio_data));
+
+    aloomy::Source audio_source;
+    audio_source.set_buffer(audio_buffer);
+    audio_source.set_loop(true);
+
+    // OpenGL stuff
     const auto program = gloomy::make_ready<gloomy::Program>(
         gloomy::make_ready<gloomy::VertexShader>(VERTEX_SHADER),
         gloomy::make_ready<gloomy::FragmentShader>(FRAGMENT_SHADER)
@@ -91,24 +131,37 @@ auto main(int argc, char* argv[]) -> int {
 
     gloomy::use([&] { vertex_array.commit(); }, vertex_array, vertex_buffer, index_buffer);
 
+    // Main loop
     auto timer = window.get_next_frame().current_time;
     auto clock = timer;
 
     while (window.is_open()) {
         const auto timeframe = window.get_next_frame();
 
-        if ((timeframe.current_time - timer) > (1.0 / TIMER_RATE)) {
+        std::size_t clock_cycles = (timeframe.current_time - clock) / (1.0 / CLOCK_RATE);
+        std::size_t timer_cycles = (timeframe.current_time - timer) / (1.0 / TIMER_RATE);
+        
+        if (timer_cycles != 0u) timer = timeframe.current_time;
+        if (clock_cycles != 0u) clock = timeframe.current_time;
+
+        // Timers
+        for (std::size_t i = 0u; i < timer_cycles; ++i) {
+            if (chip8.sound_timer == 0 && audio_source.get_state() == aloomy::SourceState::PLAYING) {
+                audio_source.stop();
+            }
+
+            if (chip8.sound_timer != 0 && audio_source.get_state() != aloomy::SourceState::PLAYING) {
+                audio_source.play();
+            }
+
             if (chip8.delay_timer != 0)
                 chip8.delay_timer -= 1;
 
             if (chip8.sound_timer != 0)
                 chip8.sound_timer -= 1;
-
-            timer -= timeframe.current_time;
         }
 
-        std::size_t cycles = (timeframe.current_time - clock) / (1.0 / CLOCK_RATE);
-
+        // Window events
         while (const auto eventopt = window.get_event()) {
 			const auto& event = eventopt.value();
 
@@ -129,22 +182,22 @@ auto main(int argc, char* argv[]) -> int {
 			}
 		}
 
-        for (std::size_t i = 0u; i < cycles; ++i) {
-            clock = timeframe.current_time;
-
+        // Emulation
+        for (std::size_t i = 0u; i < clock_cycles; ++i) {
+            // Update keyboard
             chip8.previous_keyboard = chip8.keyboard;
             for (std::size_t key = 0x0; key < chip8::KEYBOARD_SIZE; ++key) {
                 chip8::set_key(chip8.keyboard, key, window.input_buffer.contains(KEY_MAPPING[key]));
             }
 
+            // Fetch and decode instruction
             const auto ic = chip8::fetch(chip8);
             const auto maybe_instruction = chip8::decode<chip8::Instruction>(ic);
 
             if (maybe_instruction.has_value()) {
+                // Execute instruction
                 const auto& instruction = maybe_instruction.value();
-
                 chip8::execute(instruction, chip8);
-
                 std::cout << chip8::display(instruction) << std::endl;
             }
             else {
@@ -153,6 +206,7 @@ auto main(int argc, char* argv[]) -> int {
             }
         }
 
+        // OpenGL draw display
 		gloomy::gl::clear_color(0.2f, 0.2f, 0.2f, 1.0f);
 		gloomy::gl::clear(gloomy::BufferBit::COLOR);
 
