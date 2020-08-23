@@ -14,7 +14,6 @@
 namespace chip8::gui {
     struct Window {
         Window(int width, int height, const std::string& title);
-        ~Window();
 
         Window(Window&&);
         Window& operator=(Window&&);
@@ -45,4 +44,6 @@ namespace chip8::gui {
         bool init_success;
         bool focus;
     };
+
+    auto init(int width, int height, const std::string& title) -> std::optional<chip8::gui::Window>;
 }

@@ -67,11 +67,7 @@ auto main(int argc, char* argv[]) -> int {
     auto chip8 = chip8::initialize({ 0x12, 0x00 }, rand());
 
     // Window
-    auto window = chip8::gui::Window(960, 480, "CHIP-8");
-    if (!window.init()) {
-        std::cout << "Window creation failed." << std::endl;
-        return EXIT_FAILURE;
-    }
+    auto window = chip8::gui::init(960, 480, "CHIP-8").value();
 
     // Audio
     auto audio_device = aloomy::Device();

@@ -3,12 +3,13 @@
 chip8::gui::Window::Window(int width, int height, const std::string& title)
     : width(width), height(height), title(title), handle(nullptr, nullptr) {}
 
-chip8::gui::Window::~Window() {
-    if (this->init_success) glfwTerminate();
-}
-
 auto chip8::gui::Window::init() -> bool {
-    glfwInit();
+    if (!glfwInit()) return false;
+
+	glfwSetErrorCallback ([](int error_code, const char* error) {
+		std::cerr << "GLFW Error: " << error << std::endl;
+	});
+
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -31,6 +32,7 @@ auto chip8::gui::Window::init() -> bool {
 	glfwSetWindowUserPointer(window.get(), this);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+		std::cout << "gladLoadGLLoader() error" << std::endl;
 		glfwTerminate();
 		return false;
 	}
@@ -106,6 +108,7 @@ chip8::gui::Window::Window(chip8::gui::Window&& other) :
 	previous_time(std::move(other.previous_time)),
 	init_success(other.init_success) {
         other.init_success = false;
+		glfwSetWindowUserPointer(this->handle.get(), this);
     }
 
 chip8::gui::Window& chip8::gui::Window::operator=(chip8::gui::Window&& other) {
@@ -117,6 +120,7 @@ chip8::gui::Window& chip8::gui::Window::operator=(chip8::gui::Window&& other) {
 	this->init_success = other.init_success;
 
     other.init_success = false;
+	glfwSetWindowUserPointer(this->handle.get(), this);
 
 	return *this;
 }
@@ -157,3 +161,10 @@ auto chip8::gui::Window::get_next_frame() -> chip8::gui::TimeFrame {
 auto chip8::gui::Window::display() -> void {
     if (this->handle) glfwSwapBuffers(this->handle.get());
 }
+
+auto chip8::gui::init(int width, int height, const std::string& title) -> std::optional<chip8::gui::Window> {
+	auto window = chip8::gui::Window(width, height, title);
+
+	if (window.init()) return std::move(window);
+	else return std::nullopt;
+};
