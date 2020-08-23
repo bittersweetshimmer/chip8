@@ -1,6 +1,6 @@
 # chip8
 A [CHIP-8](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM) emulator.
-* Runs at [500Hz](https://github.com/bittersweetshimmer/chip8/blob/master/chip8/src/main.cpp#L13).
+* Runs at [500Hz](https://github.com/bittersweetshimmer/chip8/blob/master/chip8-bin/src/main.cpp#L13).
 * Quits if an invalid instruction is encountered.
 * [`DRW`](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#Dxyn) wraps around the display.
 * Ignores [`SYS`](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#0nnn).
@@ -13,7 +13,7 @@ A [CHIP-8](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM) emulator.
 > cmake .. 
 > # On windows you might need to specify OpenAL directories: 
 > # cmake .. -DOPENAL_LIBRARY=C:\Path\OpenAL\libs\x64 -DOPENAL_INCLUDE_DIR=C:\Path\OpenAL\include
-> cmake --build . --config Release --target chip8 -j8
+> cmake --build . --config Release --target chip8-bin -j8
 ```
 
 ### Usage
